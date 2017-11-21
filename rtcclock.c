@@ -90,19 +90,22 @@ void __attribute__ ((interrupt(RTC_VECTOR))) RTC_ISR (void)
 {
     uint16_t iv = RTCIV; // Clears RTCIFG
 
-    P1OUT ^= BIT0;
-    SYSCFG0 = FRWPPW | DFWP;
+    //P1OUT ^= BIT0;
+    uint16_t frwp = SYSCFG0 & (DFWP | PFWP); // Save SYSCFG0 so we restore it before exiting
+
+    SYSCFG0 = FRWPPW;
     rtcclock_current++;
-    SYSCFG0 = FRWPPW | PFWP | DFWP;
     unsigned int i;
     for (i=RTC_MAX_ALARM_COUNT; i > 0; i--) {
         if (rtcAlarms[i-1] != (void *)0) {
             if (rtcAlarms[i-1]->timestamp == rtcclock_current) {
+                // We can support FRAM-based rtc_alarm_t struct pointers b/c FRAM WP is disabled earlier in this ISR.
                 rtcAlarms[i-1]->triggered = true;
                 __bic_SR_register_on_exit(LPM4_bits);
             }
         }
     }
+    SYSCFG0 = FRWPPW | frwp; // Restore SYSCFG0 to pre-interrupt state
 }
 
 /* The bulk of this codebase is the interpretation functionality. */

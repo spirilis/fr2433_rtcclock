@@ -51,10 +51,6 @@
  *              while actively monitoring its trigger, keeping the chip in LPM0 between, and advancing the alarm
  *              time to blink the green LED (P1.1 on the FR2433 LaunchPad).
  *
- * Gotchas:     The rtcclock library modifies each rtcclock_alarm_t entry's "triggered" field, however, on the FR2433
- *              which has FRAM Write Protection, if the rtcclock_alarm_t pointer happens to point to FRAM, this will
- *              cause a write violation since the library does not disable FRAM write protection.  I may add a SYSCFG0
- *              write-protect-disable around that soon just to support persistent alarms.
  *
  */
 
