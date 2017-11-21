@@ -74,7 +74,7 @@ void RTClock_init_using_VLOCLK(uint32_t curclk)
     // Clear RTCIFG if set
     uint16_t iv = RTCIV;
     // Source from VLOCLK with no divider, so RTCMOD can be used to trim for VLO inaccuracy.
-    RTCCTL = RTCSS__SMCLK | RTCSR | RTCPS__1 | RTCIE;
+    RTCCTL = RTCSS__VLOCLK | RTCSR | RTCPS__1 | RTCIE;
 
 }
 
