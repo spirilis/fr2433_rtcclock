@@ -107,18 +107,22 @@ void main (void)
     CS_initClockSignal(CS_MCLK, CS_DCOCLKDIV_SELECT, CS_CLOCK_DIVIDER_1); // Activate MCLK = DCO w/ FLL
     __enable_interrupt();
 
+    // RTClock library init
     if (!has_init_rtc) {
         RTClock_init(rtc_initial_load_timestamp);
         SYSCFG0 = FRWPPW | DFWP; // FR2433 FRAM write protection disable
         has_init_rtc = true;
         SYSCFG0 = FRWPPW | PFWP | DFWP; // FR2433 FRAM write protection re-enable
     } else {
-        RTClock_init(0);
+        RTClock_init(0); // 0 means, leave the FRAM-based internal RTC counter alone during init, counting from where the MCU left off last time
     }
 
+    // Setting an alarm for 60 seconds after the initial timestamp
+    // Note that if you reset the chip more than 60 seconds after loading the code, none of this should work again!  The testAlarm does not
+    // live in FRAM.
     rtclock_alarm_t testAlarm;
     testAlarm.timestamp = rtc_initial_load_timestamp + 60;
-    RTClock_setAlarm(&testAlarm);
+    RTClock_setAlarm(&testAlarm); // RTClock library stores a pointer to your alarm and checks it during the RTC interrupt.
 
     while (1) {
         LPM0;
