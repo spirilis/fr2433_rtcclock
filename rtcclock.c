@@ -70,11 +70,11 @@ void RTClock_init_using_VLOCLK(uint32_t curclk)
         SYSCFG0 = FRWPPW | PFWP | DFWP;
     }
     // Using VLOCLK assumed to be 10KHz
-    RTCMOD = 100 - 1;
+    RTCMOD = 10000 - 1;
     // Clear RTCIFG if set
     uint16_t iv = RTCIV;
-    // Source from VLOCLK dividing by 1000, so RTC count of 100 yields 1 second per tick
-    RTCCTL = RTCSS__SMCLK | RTCSR | RTCPS__100 | RTCIE;
+    // Source from VLOCLK with no divider, so RTCMOD can be used to trim for VLO inaccuracy.
+    RTCCTL = RTCSS__SMCLK | RTCSR | RTCPS__1 | RTCIE;
 
 }
 
