@@ -64,7 +64,7 @@
 
 #pragma PERSISTENT(has_init_rtc)
 bool has_init_rtc = false;
-uint32_t rtc_initial_load_timestamp = 1511296859;
+const uint32_t rtc_initial_load_timestamp = 1511296859;
 
 void main (void)
 {
@@ -109,12 +109,12 @@ void main (void)
 
     // RTClock library init
     if (!has_init_rtc) {
-        RTClock_init(rtc_initial_load_timestamp);
+        RTClock_init_using_XT1CLK(rtc_initial_load_timestamp);
         SYSCFG0 = FRWPPW | DFWP; // FR2433 FRAM write protection disable
         has_init_rtc = true;
         SYSCFG0 = FRWPPW | PFWP | DFWP; // FR2433 FRAM write protection re-enable
     } else {
-        RTClock_init(0); // 0 means, leave the FRAM-based internal RTC counter alone during init, counting from where the MCU left off last time
+        RTClock_init_using_XT1CLK(0); // 0 means, leave the FRAM-based internal RTC counter alone during init, counting from where the MCU left off last time
     }
 
     // Setting an alarm for 60 seconds after the initial timestamp

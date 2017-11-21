@@ -43,7 +43,9 @@ typedef struct {
 #define RTC_MAX_ALARM_COUNT 3
 
 /* Function prototypes */
-void RTClock_init(uint32_t);  // Supply optional "current rtc clock" setting (if 0, it pulls from internal FRAM)
+void RTClock_init_using_XT1CLK(uint32_t);  // Supply optional "current rtc clock" setting (if 0, it pulls from internal FRAM)
+void RTClock_init_using_SMCLK(uint32_t, uint32_t smclk_freq); // Configure RTC using SMCLK, must specify frequency
+void RTClock_init_using_VLOCLK(uint32_t); // Configure RTC using 10KHz VLOCLK, for when you can deal with poor accuracy and no XT1
 int RTClock_compare(uint32_t); // Compare specified date yielding -1 if it came before, 0 if same time, 1 if came after present time.
 void RTClock_get(uint32_t *);  // Caller supplies a pointer to a 32-bit unsigned integer.
 bool RTClock_setAlarm(rtclock_alarm_t *);

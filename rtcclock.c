@@ -27,8 +27,7 @@ uint32_t rtcclock_current __attribute__((section(".text"))) = 0;
 rtclock_alarm_t * rtcAlarms[RTC_MAX_ALARM_COUNT];
 
 // Uses XT1 and expects it to already be initialized
-// Note there's no way presently to pre-define rtcclock_upper!  Hopefully this is reprogrammed by 2038...
-void RTClock_init(uint32_t curclk)
+void RTClock_init_using_XT1CLK(uint32_t curclk)
 {
     if (curclk != 0) {
         // Write curclk to rtcclock_current
@@ -42,6 +41,41 @@ void RTClock_init(uint32_t curclk)
     uint16_t iv = RTCIV;
     // Source from XT1 dividing by 1024, so RTC count of 32 yields 1 second per tick
     RTCCTL = RTCSS__XT1CLK | RTCSR | RTCPS__1024 | RTCIE;
+}
+
+// Use SMCLK for those without a soldered XT1 who go no lower than LPM0
+void RTClock_init_using_SMCLK(uint32_t curclk, uint32_t smclk_freq)
+{
+    if (curclk != 0) {
+        // Write curclk to rtcclock_current
+        SYSCFG0 = FRWPPW | DFWP;
+        rtcclock_current = curclk;
+        SYSCFG0 = FRWPPW | PFWP | DFWP;
+    }
+    // Using SMCLK at caller-specified frequency
+    RTCMOD = (uint16_t)(smclk_freq / 1024) - 1;
+    // Clear RTCIFG if set
+    uint16_t iv = RTCIV;
+    // Source from SMCLK dividing by 1024, RTCMOD computed to tick once per second
+    RTCCTL = RTCSS__SMCLK | RTCSR | RTCPS__1024 | RTCIE;
+}
+
+// Use VLOCLK for those without a soldered XT1 who don't care about accuracy
+void RTClock_init_using_VLOCLK(uint32_t curclk)
+{
+    if (curclk != 0) {
+        // Write curclk to rtcclock_current
+        SYSCFG0 = FRWPPW | DFWP;
+        rtcclock_current = curclk;
+        SYSCFG0 = FRWPPW | PFWP | DFWP;
+    }
+    // Using VLOCLK assumed to be 10KHz
+    RTCMOD = 100 - 1;
+    // Clear RTCIFG if set
+    uint16_t iv = RTCIV;
+    // Source from VLOCLK dividing by 1000, so RTC count of 100 yields 1 second per tick
+    RTCCTL = RTCSS__SMCLK | RTCSR | RTCPS__100 | RTCIE;
+
 }
 
 // RTC interrupt service routine
