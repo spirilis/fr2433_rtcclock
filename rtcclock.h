@@ -51,4 +51,12 @@ void RTClock_get(uint32_t *);  // Caller supplies a pointer to a 32-bit unsigned
 bool RTClock_setAlarm(rtclock_alarm_t *);
 bool RTClock_clearAlarm(rtclock_alarm_t *);
 
+/* The user may access the current clock timestamp directly instead of using RTClock_get().
+ *
+ * However, if you expect to perform multiple operations (comparisons, say) against it in a single
+ * block of code, it might be useful to make a copy of this into a local variable first, as the counter
+ * is liable to change at any time based on when the RTC interrupt fires.
+ */
+extern uint32_t rtcclock_current;
+
 #endif /* RTCCLOCK_H_ */

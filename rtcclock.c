@@ -111,10 +111,12 @@ void __attribute__ ((interrupt(RTC_VECTOR))) RTC_ISR (void)
 /* The bulk of this codebase is the interpretation functionality. */
 int RTClock_compare(uint32_t tstmp)
 {
-    if (tstmp > rtcclock_current) {
+    uint32_t tmpstamp = rtcclock_current; // Save current timestamp locally in case it changes mid-function
+
+    if (tstmp > tmpstamp) {
         return 1;
     }
-    if (tstmp < rtcclock_current) {
+    if (tstmp < tmpstamp) {
         return -1;
     }
     return 0; // Exact same time!
@@ -135,8 +137,8 @@ bool RTClock_setAlarm(rtclock_alarm_t * a)
 
     for (i=RTC_MAX_ALARM_COUNT; i > 0; i--) {
         if (rtcAlarms[i-1] == (void *)0) {
-            rtcAlarms[i-1] = a;
             a->triggered = false;
+            rtcAlarms[i-1] = a;
             return true; // Found an open slot for this alarm
         }
     }
